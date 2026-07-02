@@ -32,6 +32,7 @@ Installation
 Clone the repository
 
 git clone https://github.com/RohaanDev/KhaOs.git
+
 cd KhaOs
 
 Install the required package
