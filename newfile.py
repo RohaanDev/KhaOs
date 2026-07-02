@@ -1,5 +1,0 @@
-Name = input("Whats your name:  ")
-age = int(input(f"nice to meet you {Name} and whats your age: "))
-pl = input("Whats your favourite programming language: ")
-final = (f"So your name is {Name} and your age is {age} and your favourite programming language is {pl}")
-print (final)
