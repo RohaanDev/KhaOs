@@ -79,6 +79,8 @@ khaOs>> run hello.py
 khaOs>> calc 5 * 12
 
 khaOs>> exit
+
+
 About:
     It is a personal project made to learn how shells work and to experiment with building command line tools in Python.
     More features will be added over time.
