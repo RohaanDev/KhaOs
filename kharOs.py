@@ -5,10 +5,79 @@ import subprocess
 import importlib.util
 import shutil
 import time
+import psutil
+import socket
+import pywifi
+import time
+from pywifi import const
 COMMANDS = {}
 GAMES = {"Snake" : "snake.py"}
+def wifi(args):
+     if args[0] == "help":
+         print("""
+WiFi Commands
+-------------
+wifi help
+wifi scan
+wifi current
+wifi connect "<SSID>" 
+wifi disconnect
+wifi ip
+""")
+     elif args[0] == "scan":
+          wifi  = pywifi.PyWiFi()
+          iface = wifi.interfaces()[0]
+          iface.scan()
+          time.sleep(4)
+          for network in iface.scan_results():
+               print(network.ssid)
+     elif args[0] =="current":
+          current_wifi = subprocess.check_output("netsh wlan show interfaces",
+                                                 shell=True,
+                                                 text=True)
+          for line in current_wifi.splitlines():
+               if "SSID" in line and "BSSID" not in line:
+                    print(line.split(":",1)[1].strip())
+                    break
+     elif args[0] == "ip":
+          s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+          s.connect(("8.8.8.8", 80))
+          print("IP:", s.getsockname()[0])
+          s.close()
+     elif args[0] == "disconnect":
+         
+          wifi  = pywifi.PyWiFi()
+          iface = wifi.interfaces()[0]
+          iface.disconnect()
+          time.sleep(3)
+          print("WIFI DISCONNECTED") 
+     elif args[0] == "connect":
+         ssid = args[1]
+         wifi = pywifi.PyWiFi()
+         iface = wifi.interfaces()[0]
+         subprocess.run(f"netsh wlan connect name={ssid}",shell=True)
+ 
+ 
+       
+           
+
+          
+
+          
 def register(name, func):
-    COMMANDS[name] = func 
+    COMMANDS[name] = func
+register("wifi",wifi)
+def sysinfo(args):
+     print("||KHA OS SYSTEM MANAGER||")
+     print(f"CPU:{psutil.cpu_percent(interval=1)}%")
+     print(f"RAM:{psutil.virtual_memory().percent}%")
+     print(f"Disk:{psutil.disk_usage("/").percent}%")
+     try:
+        print(f"Battery{psutil.sensors_battery().percent}%")
+     except:
+        print("NO BATTERY FOUND")
+     
+register("sysinfo",sysinfo)
 def run(args):
     target = args[0]
     if not os.path.exists(target):
@@ -18,7 +87,10 @@ def run(args):
     if ext == ".py":
         time.sleep(0.55)
         print (f"running" , target)
-        subprocess.run(["python", target])       
+        try:
+            subprocess.run(["python", target])
+        except:
+            subprocess.run(["python3", target])
     elif ext == ".js":
         subprocess.run(["node", target])
     elif ext == ".c":
@@ -94,6 +166,7 @@ def search(args):
                 print(indent + "  └── " + f)
             else:
                 print(indent + "  ├── " + f)
+
 def game(args):
 	for i in GAMES:
 		print(i)
@@ -101,6 +174,9 @@ def calc(args):
 	print(eval(args[0]))
 register("calc",calc)
 register("game", game)
+def forge(args):
+     subprocess.run(["git","clone",args[0]])
+register("forge",forge)
 def load_command(filepath):
     name = os.path.splitext(os.path.basename(filepath))[0]
     spec = importlib.util.spec_from_file_location(name, filepath)
@@ -143,7 +219,10 @@ def clear(args):
 
     print("\033c", end="")
     art.tprint("KhaOs")
-
+def fc(args):
+     for item in os.listdir():
+          print(item)
+register("fc", fc)
 register("clear", clear)
 def help(args):
 	for i in COMMANDS:
@@ -167,9 +246,11 @@ while True:
         else:
             subprocess.run(parts)
             continue
-    except FileNotFoundError:
-        print("KhaOs: command not found")
-    except IndexError:
-        print("KhaOs: missing arguments")
+    except FileNotFoundError as e:
+        print("KhaOs:", e)
+    except IndexError as e:
+        print("KhaOs:", e)
     except Exception as e:
         print("KhaOs: " , e)
+print("COMMANDS:", COMMANDS.keys())
+
